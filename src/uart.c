@@ -28,3 +28,14 @@
 #define UART0_RX_PIN (1U << 0) // PA0
 #define UART0_TX_PIN (1U << 1) // PA1
 
+void UART_Init(void){
+    RCGC_UART_R |= (1U << 0); // Enable clock for UART0
+    RCGC_GPIO_R |= (1U << 0); // Enable clock for GPIO Port A
+    volatile uint32_t delay = RCGC_UART_R; // Delay to allow clock to stabilize
+    (void)delay; // Suppress unused variable warning
+    GPIO_PORTA_AFSEL_R |= (UART0_RX_PIN | UART0_TX_PIN); // Enable alternate function for UART pins
+    GPIO_PORTA_DEN_R |= (UART0_RX_PIN | UART0_TX_PIN); // Enable digital I/O for UART pins
+    GPIO_PORTA_PCTL_R &= ~(0xFFU); // Clear PCTL bits for PA0 and PA1 just to make sure
+    GPIO_PORTA_PCTL_R |= (1U << 0) | (1U << 4); // Configure pin functions for UART0
+}
+
