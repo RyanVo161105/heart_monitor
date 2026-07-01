@@ -25,6 +25,15 @@
 #define GPIO_PORTA_DEN_R (*((volatile uint32_t *)(GPIO_PORTA_BASE_ADDR + GPIO_PORTA_DEN_OFFSET)))
 #define GPIO_PORTA_PCTL_R (*((volatile uint32_t *)(GPIO_PORTA_BASE_ADDR + GPIO_PORTA_PCTL_OFFSET)))
 
+#define UART0_BASE_ADDR 0x4000C000U
+
+#define UART0_FR_OFFSET 0x018U
+#define UART0_DR_OFFSET 0x000U
+#define TXFF (1U << 5)
+
+#define UART0_DR_R (*((volatile uint32_t *)(UART0_BASE_ADDR + UART0_DR_OFFSET)))
+#define UART0_FR_R (*((volatile uint32_t *)(UART0_BASE_ADDR + UART0_FR_OFFSET)))
+
 #define UART0_RX_PIN (1U << 0) // PA0
 #define UART0_TX_PIN (1U << 1) // PA1
 
@@ -37,5 +46,16 @@ void UART_Init(void){
     GPIO_PORTA_DEN_R |= (UART0_RX_PIN | UART0_TX_PIN); // Enable digital I/O for UART pins
     GPIO_PORTA_PCTL_R &= ~(0xFFU); // Clear PCTL bits for PA0 and PA1 just to make sure
     GPIO_PORTA_PCTL_R |= (1U << 0) | (1U << 4); // Configure pin functions for UART0
+}
+
+void UART_SendChar(char c){
+    while(UART0_FR_R & TXFF); // Wait until the transmit FIFO is not full
+    UART0_DR_R = c; // Send the character
+}
+void UART_SendString(const char *str){
+    while(*str != '\0'){
+        UART_SendChar(*str); 
+        str++;
+    }
 }
 
