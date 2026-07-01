@@ -18,3 +18,13 @@ This project will eventually integrate sensor acquisition, heart-rate processing
 ## Firmware Architecture
 
 ![Firmware Architecture Block Diagram](docs/block_diagram/block_diagram.png)
+
+## Driver Progress
+
+- [x] GPIO Driver
+- [x] UART Driver
+- [ ] I2C Driver
+- [ ] MAX30102 Driver
+- [ ] Heart Rate Algorithm
+- [ ] BLE Communication
+- [ ] Final Integration
