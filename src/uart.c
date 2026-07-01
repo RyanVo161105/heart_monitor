@@ -29,10 +29,28 @@
 
 #define UART0_FR_OFFSET 0x018U
 #define UART0_DR_OFFSET 0x000U
-#define TXFF (1U << 5)
+#define UART_FR_TXFF (1U << 5)
 
 #define UART0_DR_R (*((volatile uint32_t *)(UART0_BASE_ADDR + UART0_DR_OFFSET)))
 #define UART0_FR_R (*((volatile uint32_t *)(UART0_BASE_ADDR + UART0_FR_OFFSET)))
+
+#define UART0_IBRD_OFFSET 0x024U
+#define UART0_FBRD_OFFSET 0x028U
+#define UART0_LCRH_OFFSET 0x02CU
+#define UART0_CTL_OFFSET 0x030U
+#define UART0_CC_OFFSET 0xFC8U
+
+#define UART0_IBRD_R (*((volatile uint32_t *)(UART0_BASE_ADDR + UART0_IBRD_OFFSET)))
+#define UART0_FBRD_R (*((volatile uint32_t *)(UART0_BASE_ADDR + UART0_FBRD_OFFSET)))
+#define UART0_LCRH_R (*((volatile uint32_t *)(UART0_BASE_ADDR + UART0_LCRH_OFFSET)))
+#define UART0_CTL_R (*((volatile uint32_t *)(UART0_BASE_ADDR + UART0_CTL_OFFSET)))
+#define UART0_CC_R (*((volatile uint32_t *)(UART0_BASE_ADDR + UART0_CC_OFFSET)))
+
+#define UARTEN (1U << 0)
+#define RXE (1U << 9)
+#define TXE (1U << 8)
+#define WLEN_8 ((1U << 5) | (1U << 6)) // Word length: 8 bits
+#define SYSCLK 0U
 
 #define UART0_RX_PIN (1U << 0) // PA0
 #define UART0_TX_PIN (1U << 1) // PA1
@@ -46,10 +64,16 @@ void UART_Init(void){
     GPIO_PORTA_DEN_R |= (UART0_RX_PIN | UART0_TX_PIN); // Enable digital I/O for UART pins
     GPIO_PORTA_PCTL_R &= ~(0xFFU); // Clear PCTL bits for PA0 and PA1 just to make sure
     GPIO_PORTA_PCTL_R |= (1U << 0) | (1U << 4); // Configure pin functions for UART0
+    UART0_CTL_R &= ~UARTEN; // Disable UART0 before configuration
+    UART0_IBRD_R = 8; // Set integer part of baud rate divisor for 115200 baud
+    UART0_FBRD_R = 44; // Set fractional part of baud rate divisor for 115200 baud
+    UART0_LCRH_R = WLEN_8; // Set word length to 8 bits
+    UART0_CC_R = SYSCLK; // Use system clock for UART
+    UART0_CTL_R |= (UARTEN | RXE | TXE); // Enable UART0, RX, and TX
 }
 
 void UART_SendChar(char c){
-    while(UART0_FR_R & TXFF); // Wait until the transmit FIFO is not full
+    while(UART0_FR_R & UART_FR_TXFF); // Wait until the transmit FIFO is not full
     UART0_DR_R = c; // Send the character
 }
 void UART_SendString(const char *str){
