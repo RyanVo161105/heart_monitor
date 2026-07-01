@@ -10,9 +10,9 @@
  */
 
  /* Configure Clock gating control for Port F*/
- #define RCGC_ADDR 0x400FE000U
+ #define SYSCTL_BASE_ADDR 0x400FE000U
  #define RCGC_GPIO_OFFSET 0x608U
- #define RCGC_GPIO_R (*((volatile uint32_t *)(RCGC_ADDR + RCGC_GPIO_OFFSET)))
+ #define RCGC_GPIO_R (*((volatile uint32_t *)(SYSCTL_BASE_ADDR + RCGC_GPIO_OFFSET)))
  /*
   * GPIO Port F register definitions
   *
