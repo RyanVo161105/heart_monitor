@@ -50,6 +50,7 @@
 #define I2C0_MCS_START (1U << 1) // START BIT / Write
 #define I2C0_MCS_RUN (1U << 0) // RUN BIT / Write
 
+
 #define RCGC_I2C_R (*((volatile uint32_t *)(SYSCTL_BASE_ADDR + RCGC_I2C_OFFSET)))
 void I2C_Init(void) {
     RCGC_I2C_R |= (1U << 0); // Enable clock for I2C0
@@ -89,5 +90,29 @@ I2C0_STATUS I2C_WriteRegister(uint8_t slaveAddr, uint8_t regAddr, uint8_t data){
         I2C0_MCS_R = I2C0_MCS_STOP;
         return I2C0_STATUS_ERROR;
     }
+    return I2C0_STATUS_OK;
+}
+I2C0_STATUS I2C_ReadRegister(uint8_t slaveAddr, uint8_t regAddr, uint8_t *data){
+    /*
+     * The first bit should be 0 
+     * 0 = Transmit
+     * 1 = Receive
+     */
+    I2C0_MSA_R = (slaveAddr << 1); //First bit is 0
+    I2C0_MDR_R = regAddr;
+    I2C0_MCS_R = (I2C0_MCS_START | I2C0_MCS_RUN); //Giving the slave which of its addresses need to be written to
+    while(I2C0_MCS_R & I2C0_MCS_BUSY); //Polling to check if the transaction is done yet
+    if(I2C0_MCS_R & I2C0_MCS_ERROR){
+        I2C0_MCS_R = I2C0_MCS_STOP;
+        return I2C0_STATUS_ERROR;
+    }
+    I2C0_MSA_R = (slaveAddr << 1 | (1U << 0)); //Change the next operation to Receive
+    I2C0_MCS_R = (I2C0_MCS_START | I2C0_MCS_RUN | I2C0_MCS_STOP);
+    while(I2C0_MCS_R & I2C0_MCS_BUSY); //Polling to check if the transaction is done yet
+    if(I2C0_MCS_R & I2C0_MCS_ERROR){
+        I2C0_MCS_R = I2C0_MCS_STOP;
+        return I2C0_STATUS_ERROR;
+    }
+    *data = (uint8_t)(I2C0_MDR_R & 0xFFU); //Only 8 bits are needed here to be copied into data
     return I2C0_STATUS_OK;
 }
