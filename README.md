@@ -23,7 +23,7 @@ This project will eventually integrate sensor acquisition, heart-rate processing
 
 - [x] GPIO Driver
 - [x] UART Driver
-- [ ] I2C Driver
+- [x] I2C Driver
 - [ ] MAX30102 Driver
 - [ ] Heart Rate Algorithm
 - [ ] BLE Communication
