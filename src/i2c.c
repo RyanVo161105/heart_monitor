@@ -43,6 +43,13 @@
 #define I2C0_PCTL_SDA (0x3U << (12)) // PCTL for PB3 (I2C0SDA)
 #define I2C0_PCTL_PINS (I2C0_PCTL_SCL | I2C0_PCTL_SDA)
 
+#define I2C0_MCS_ERROR (1U << 1) // ERROR BIT / Read 
+#define I2C0_MCS_BUSBSY (1U << 6) // BUSBSY BIT / Read
+#define I2C0_MCS_BUSY (1U << 0) // BUSY BIT / Read
+#define I2C0_MCS_STOP (1U << 2) // STOP BIT / Write
+#define I2C0_MCS_START (1U << 1) // START BIT / Write
+#define I2C0_MCS_RUN (1U << 0) // RUN BIT / Write
+
 #define RCGC_I2C_R (*((volatile uint32_t *)(SYSCTL_BASE_ADDR + RCGC_I2C_OFFSET)))
 void I2C_Init(void) {
     RCGC_I2C_R |= (1U << 0); // Enable clock for I2C0
@@ -60,4 +67,27 @@ void I2C_Init(void) {
      * TPR = (16,000,000 / (2*(6 + 4)*100,000)) - 1 = 7
      */
     I2C0_MTPR_R = 0x00000007U; // Set the I2C clock speed to 100 kbps
+}
+I2C0_STATUS I2C_WriteRegister(uint8_t slaveAddr, uint8_t regAddr, uint8_t data){
+    /*
+     * The first bit should be 0 
+     * 0 = Transmit
+     * 1 = Receive
+     */
+    I2C0_MSA_R = (slaveAddr << 1); //First bit is 0
+    I2C0_MDR_R = regAddr;
+    I2C0_MCS_R = (I2C0_MCS_START | I2C0_MCS_RUN); //Giving the slave which of its addresses need to be written to
+    while(I2C0_MCS_R & I2C0_MCS_BUSY); //Polling to check if the transmission is done yet
+    if(I2C0_MCS_R & I2C0_MCS_ERROR){
+        I2C0_MCS_R = I2C0_MCS_STOP;
+        return I2C0_STATUS_ERROR;
+    }
+    I2C0_MDR_R = data;
+    I2C0_MCS_R = (I2C0_MCS_RUN | I2C0_MCS_STOP); //Giving the slave data which being written into regAddr
+    while(I2C0_MCS_R & I2C0_MCS_BUSY); //Polling to check if the transmission is done yet
+    if(I2C0_MCS_R & I2C0_MCS_ERROR){
+        I2C0_MCS_R = I2C0_MCS_STOP;
+        return I2C0_STATUS_ERROR;
+    }
+    return I2C0_STATUS_OK;
 }
