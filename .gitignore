@@ -1,0 +1,38 @@
+# KiCad temporary and backup files
+*-backups/
+*.kicad_prl
+*.lck
+_autosave-*
+*.bak
+fp-info-cache
+
+# Downloaded CAD archives (commit extracted libraries instead)
+hardware/kicad/**/*.zip
+
+# Firmware build outputs
+build/
+Debug/
+Release/
+Objects/
+Listings/
+*.o
+*.obj
+*.d
+*.elf
+*.axf
+*.map
+
+# Keil user-specific settings
+*.uvguix.*
+
+# Editor temporary files
+*.swp
+*.swo
+*~
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+
+# Vendor CAD import instructions
+hardware/kicad/**/*ImportGuide*.html

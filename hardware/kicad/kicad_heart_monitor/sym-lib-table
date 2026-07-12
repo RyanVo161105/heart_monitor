@@ -1,0 +1,6 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "TM4C123GH6PM")(type "KiCad")(uri "${KIPRJMOD}/ul_TM4C123GH6PMI7/KiCADv6/2026-07-11_22-07-27.kicad_sym")(options "")(descr ""))
+  (lib (name "MAX30102")(type "KiCad")(uri "${KIPRJMOD}/ul_MAX30102EFD-T/KiCADv6/2026-07-11_23-55-36.kicad_sym")(options "")(descr ""))
+  (lib (name "TPS7A")(type "KiCad")(uri "${KIPRJMOD}/ul_TPS7A0312PDBVR/KiCADv6/2026-07-12_02-09-56.kicad_sym")(options "")(descr ""))
+)
