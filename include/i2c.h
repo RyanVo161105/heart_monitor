@@ -1,12 +1,7 @@
 #ifndef I2C_H
 #define I2C_H
-typedef enum {
-    I2C0_STATUS_OK,
-    I2C0_STATUS_ERROR
-} I2C0_STATUS;
 
 void I2C_Init(void);
-I2C0_STATUS I2C_WriteRegister(uint8_t slaveAddr, uint8_t regAddr, uint8_t data);
-I2C0_STATUS I2C_ReadRegister(uint8_t slaveAddr, uint8_t regAddr, uint8_t *data);
-
+I2C_WriteStatus I2C_WriteSlave(uint8_t slaveAddr, uint8_t *data_ptr, uint8_t length);
+I2C_ReadStatus I2C_ReadSlave(uint8_t slaveAddr, uint8_t *data, uint8_t length);
 #endif
