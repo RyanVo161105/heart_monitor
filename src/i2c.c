@@ -62,13 +62,13 @@ typedef enum{
   I2C_ReadFailed,
 }I2C_ReadStatus;
 void I2C_Init(void) {
-    RCGC_I2C_R |= (1U << 0); // Enable clock for I2C0
-    RCGC_GPIO_R |= (1U << 1); // Enable clock for GPIO Port B
-    GPIO_PORTB_DEN_R |= I2C0_PINS; // Enable digital function for PB2 and PB3
-    GPIO_PORTB_AFSEL_R |= I2C0_PINS; // Enable alternate function for PB2 and PB3
-    GPIO_PORTB_ODR_R |= I2C0_PINS; // Enable open-drain for PB2 and PB3
-    GPIO_PORTB_PCTL_R |= I2C0_PCTL_PINS; // Configure PCTL for PB2 and PB3
-    I2C0_MCR_R |= 0x00000010U; // Enable I2C Master function, the value 0x0000.0010U is specified in the datasheet for this microcontroller
+    RCGC_I2C_R |= (1U << 0); 
+    RCGC_GPIO_R |= (1U << 1);
+    GPIO_PORTB_DEN_R |= I2C0_PINS;
+    GPIO_PORTB_AFSEL_R |= I2C0_PINS; 
+    GPIO_PORTB_ODR_R |= I2C0_PINS; 
+    GPIO_PORTB_PCTL_R |= I2C0_PCTL_PINS; 
+    I2C0_MCR_R |= 0x00000010U; 
     /*
      * Set the I2C clock speed to 100 kbps
      * TPR = (System Clock / (2*(SCL_LP + SCL_HP)*I2C_Clk)) - 1 
@@ -76,7 +76,7 @@ void I2C_Init(void) {
      * System Clock = 16 MHz
      * TPR = (16,000,000 / (2*(6 + 4)*100,000)) - 1 = 7
      */
-    I2C0_MTPR_R = 0x00000007U; // Set the I2C clock speed to 100 kbps
+    I2C0_MTPR_R = 0x00000007U;
 }
 I2C_WriteStatus I2C_WriteSlave(uint8_t slaveAddr, uint8_t *data_ptr, uint8_t length){
     I2C0_MSA_R = (slaveAddr << 1U);
@@ -118,6 +118,6 @@ I2C_WriteStatus I2C_WriteSlave(uint8_t slaveAddr, uint8_t *data_ptr, uint8_t len
       return I2C_WriteFailed;
     }
 }
-I2C_ReadStatus I2C_ReadSlave(uint8_t slaveAddr, uint8_t *value){
+I2C_ReadStatus I2C_ReadSlave(uint8_t slaveAddr, uint8_t *data, uint8_t length){
 
 }
