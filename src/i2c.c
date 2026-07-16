@@ -52,15 +52,6 @@
 
 
 #define RCGC_I2C_R (*((volatile uint32_t *)(SYSCTL_BASE_ADDR + RCGC_I2C_OFFSET)))
-typedef enum{
-  I2C_WriteSuccess,
-  I2C_WriteFailed,
-} I2C_WriteStatus;
-
-typedef enum{
-  I2C_ReadSuccess,
-  I2C_ReadFailed,
-}I2C_ReadStatus;
 void I2C_Init(void) {
     RCGC_I2C_R |= (1U << 0); 
     RCGC_GPIO_R |= (1U << 1);
