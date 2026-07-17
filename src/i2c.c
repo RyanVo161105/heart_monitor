@@ -49,7 +49,7 @@
 #define I2C0_MCS_STOP (1U << 2) // STOP BIT / Write
 #define I2C0_MCS_START (1U << 1) // START BIT / Write
 #define I2C0_MCS_RUN (1U << 0) // RUN BIT / Write
-
+#define I2C0_MCS_ACK (1U << 3) // ACK BIT / Write
 
 #define RCGC_I2C_R (*((volatile uint32_t *)(SYSCTL_BASE_ADDR + RCGC_I2C_OFFSET)))
 void I2C_Init(void) {
@@ -59,7 +59,7 @@ void I2C_Init(void) {
     GPIO_PORTB_AFSEL_R |= I2C0_PINS; 
     GPIO_PORTB_ODR_R |= I2C0_PINS; 
     GPIO_PORTB_PCTL_R |= I2C0_PCTL_PINS; 
-    I2C0_MCR_R |= 0x00000010U; 
+    I2C0_MCR_R |= 0x010U; 
     /*
      * Set the I2C clock speed to 100 kbps
      * TPR = (System Clock / (2*(SCL_LP + SCL_HP)*I2C_Clk)) - 1 
@@ -67,7 +67,7 @@ void I2C_Init(void) {
      * System Clock = 16 MHz
      * TPR = (16,000,000 / (2*(6 + 4)*100,000)) - 1 = 7
      */
-    I2C0_MTPR_R = 0x00000007U;
+    I2C0_MTPR_R = 0x07U;
 }
 I2C_WriteStatus I2C_WriteSlave(uint8_t slaveAddr, uint8_t *data_ptr, uint8_t length){
     I2C0_MSA_R = (slaveAddr << 1U);
@@ -109,6 +109,46 @@ I2C_WriteStatus I2C_WriteSlave(uint8_t slaveAddr, uint8_t *data_ptr, uint8_t len
       return I2C_WriteFailed;
     }
 }
-I2C_ReadStatus I2C_ReadSlave(uint8_t slaveAddr, uint8_t *data, uint8_t length){
-
+I2C_ReadStatus I2C_ReadSlave(uint8_t slaveAddr, uint8_t regAddr, uint8_t *data, uint8_t length){
+  I2C0_MSA_R = (slaveAddr << 1U);
+  I2C0_MDR_R = regAddr;
+  I2C0_MCS_R = (I2C0_MCS_START | I2C0_MCS_RUN);
+  while(I2C0_MCS_R & I2C0_MCS_BUSY){};
+  if((I2C0_MCS_R & I2C0_MCS_ERROR) != 0){
+    return I2C_ReadFailed;  
+  }
+  I2C0_MSA_R = (slaveAddr << 1U) | 1U;
+  if(length == 1){
+    I2C0_MCS_R = (I2C0_MCS_START | I2C0_MCS_RUN | I2C0_MCS_STOP);
+    while(I2C0_MCS_R & I2C0_MCS_BUSY){};
+    if((I2C0_MCS_R & I2C0_MCS_ERROR) != 0){
+      return I2C_ReadFailed;
+    }
+    data[0] = I2C0_MDR_R;
+    return I2C_ReadSuccess;
+  }else if(length >= 1){
+    I2C0_MCS_R = (I2C0_MCS_START | I2C0_MCS_RUN | I2C0_MCS_ACK);
+    while(I2C0_MCS_R & I2C0_MCS_BUSY){};
+    if((I2C0_MCS_R & I2C0_MCS_ERROR) != 0){
+      return I2C_ReadFailed;
+    }
+    data[0] = I2C0_MDR_R;
+    for(int i = 1; i < length -1; i++){
+      I2C0_MCS_R = (I2C0_MCS_RUN | I2C0_MCS_ACK);
+      while(I2C0_MCS_R & I2C0_MCS_BUSY){};
+      if((I2C0_MCS_R & I2C0_MCS_ERROR) != 0){
+        return I2C_ReadFailed;
+      }
+      data[i] = I2C0_MDR_R;
+    }
+    I2C0_MCS_R = (I2C0_MCS_RUN | I2C0_MCS_STOP);
+      while(I2C0_MCS_R & I2C0_MCS_BUSY){};
+      if((I2C0_MCS_R & I2C0_MCS_ERROR) != 0){
+        return I2C_ReadFailed;
+      }
+    data[length-1]=I2C0_MDR_R;
+  }else{
+    return I2C_ReadFailed;
+  }
+  return I2C_ReadSuccess;
 }
